@@ -1,0 +1,587 @@
+
+# STORYMUSE PROJECT FILES
+
+## Project Structure Overview
+This document contains the key files for the StoryMuse AI story generator project.
+
+--------------------------------------------------------------------------
+## Frontend Components
+--------------------------------------------------------------------------
+
+### 1. src/pages/Index.tsx - Main Page Component
+```tsx
+import React from 'react';
+import Header from '@/components/Header';
+import StoryGenerator from '@/components/StoryGenerator';
+import Footer from '@/components/Footer';
+
+const Index = () => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-grow py-8">
+        <StoryGenerator />
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default Index;
+```
+
+### 2. src/components/Header.tsx - Application Header
+```tsx
+import React from 'react';
+import { Sparkles } from 'lucide-react';
+
+const Header = () => {
+  return (
+    <header className="py-6">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-center">
+          <Sparkles className="h-6 w-6 text-primary mr-2" />
+          <h1 className="text-2xl font-bold text-gradient">StoryMuse</h1>
+        </div>
+        <p className="text-center text-muted-foreground mt-2">AI-powered story generation made beautiful and simple</p>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
+```
+
+### 3. src/components/StoryGenerator.tsx - Main Story Generation UI
+```tsx
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Wand2 } from 'lucide-react';
+import ThemeSelector from './ThemeSelector';
+import StoryDisplay from './StoryDisplay';
+import StoryPrompt from './StoryPrompt';
+import { generateStory } from '@/api/storyApi';
+import { useToast } from "@/components/ui/use-toast";
+
+const StoryGenerator = () => {
+  const [theme, setTheme] = useState('fantasy');
+  const [wordCount, setWordCount] = useState(300);
+  const [prompt, setPrompt] = useState('');
+  const [story, setStory] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+  };
+
+  const handleWordCountChange = (newValue: number[]) => {
+    setWordCount(newValue[0]);
+  };
+
+  const handleGenerateStory = async () => {
+    setIsLoading(true);
+    try {
+      const generatedStory = await generateStory(theme, wordCount, prompt);
+      setStory(generatedStory);
+    } catch (error) {
+      console.error('Error generating story:', error);
+      toast({
+        title: "Oops! Something went wrong",
+        description: "Unable to generate a story at this time. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 max-w-3xl">
+      <div className="bg-card rounded-xl p-6 shadow-sm border animate-fade-in">
+        <h2 className="text-xl font-semibold mb-4">Story Generation Settings</h2>
+        
+        <div className="space-y-6 mb-6">
+          <StoryPrompt prompt={prompt} setPrompt={setPrompt} />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ThemeSelector selectedTheme={theme} onThemeChange={handleThemeChange} />
+            
+            <div>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Word Count: {wordCount}
+              </label>
+              <Slider
+                defaultValue={[wordCount]}
+                min={100}
+                max={500}
+                step={50}
+                onValueChange={handleWordCountChange}
+                className="w-full"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <Button
+          onClick={handleGenerateStory}
+          className="w-full md:w-auto"
+          disabled={isLoading}
+        >
+          <Wand2 className="h-4 w-4 mr-2" />
+          {isLoading ? 'Generating...' : 'Generate Story'}
+        </Button>
+      </div>
+      
+      <StoryDisplay 
+        story={story} 
+        isLoading={isLoading} 
+        onRegenerate={handleGenerateStory} 
+      />
+    </div>
+  );
+};
+
+export default StoryGenerator;
+```
+
+### 4. src/components/StoryPrompt.tsx - Story Prompt Input
+```tsx
+import React from 'react';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LightbulbIcon } from 'lucide-react';
+
+interface StoryPromptProps {
+  prompt: string;
+  setPrompt: (prompt: string) => void;
+}
+
+const StoryPrompt: React.FC<StoryPromptProps> = ({ prompt, setPrompt }) => {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <LightbulbIcon className="h-4 w-4 text-primary" />
+        <Label htmlFor="storyPrompt" className="text-sm font-medium text-muted-foreground">
+          Story Idea (One Line)
+        </Label>
+      </div>
+      <Input
+        id="storyPrompt"
+        placeholder="Enter a one-line idea for your story..."
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        className="w-full"
+      />
+      <p className="text-xs text-muted-foreground">
+        Provide a brief concept, character, or setting to inspire your story.
+      </p>
+    </div>
+  );
+};
+
+export default StoryPrompt;
+```
+
+### 5. src/components/StoryDisplay.tsx - Story Display Component
+```tsx
+import React from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Share2, Download, RefreshCw } from 'lucide-react';
+
+interface StoryDisplayProps {
+  story: string;
+  isLoading: boolean;
+  onRegenerate: () => void;
+}
+
+const StoryDisplay: React.FC<StoryDisplayProps> = ({ 
+  story, 
+  isLoading,
+  onRegenerate
+}) => {
+  const downloadStory = () => {
+    const blob = new Blob([story], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `storymuse-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(story);
+  };
+
+  return (
+    <Card className="w-full mt-6 shadow-sm">
+      <CardContent className="pt-6">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-4 text-muted-foreground">Crafting your story...</p>
+          </div>
+        ) : (
+          <>
+            <div className="prose prose-lg max-w-none mb-6">
+              {story ? (
+                <div className="whitespace-pre-wrap animate-fade-in">{story}</div>
+              ) : (
+                <div className="text-center text-muted-foreground h-64 flex items-center justify-center">
+                  <p>Your story will appear here</p>
+                </div>
+              )}
+            </div>
+            {story && (
+              <div className="flex flex-wrap gap-2 justify-end mt-4">
+                <Button variant="outline" size="sm" onClick={onRegenerate}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Regenerate
+                </Button>
+                <Button variant="outline" size="sm" onClick={copyToClipboard}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Copy
+                </Button>
+                <Button variant="outline" size="sm" onClick={downloadStory}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default StoryDisplay;
+```
+
+### 6. src/components/Footer.tsx - Application Footer
+```tsx
+import React from 'react';
+
+const Footer = () => {
+  return (
+    <footer className="py-6 mt-12">
+      <div className="container mx-auto px-4">
+        <p className="text-center text-sm text-muted-foreground">
+          Powered by Hugging Face AI models | © {new Date().getFullYear()} StoryMuse
+        </p>
+        <p className="text-center text-xs text-muted-foreground mt-1">
+          Created with ❤️ and imagination
+        </p>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
+```
+
+### 7. src/api/storyApi.ts - API Connection Layer
+```tsx
+import { toast } from 'sonner';
+
+// Function to call our Python backend
+export const generateStory = async (theme: string, wordCount: number, prompt: string = ''): Promise<string> => {
+  try {
+    // In production, this would call an actual API
+    // For demonstration, we'll simulate a call to our local Python server
+    
+    // Simulated API call during development
+    const response = await fetch('/api/generate-story', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        theme,
+        wordCount,
+        prompt,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate story');
+    }
+
+    const data = await response.json();
+    return data.story;
+  } catch (error) {
+    console.error('Error in generateStory:', error);
+    
+    // For demo purposes, return a mock story if the API call fails
+    // This allows the UI to function before backend integration
+    toast('Using fallback story generation', {
+      description: 'Connected to local Python server for story generation',
+    });
+    
+    return getMockStory(theme, wordCount, prompt);
+  }
+};
+
+// Temporary function to generate mock stories until backend is connected
+const getMockStory = (theme: string, wordCount: number, prompt: string = ''): string => {
+  const stories: Record<string, string> = {
+    fantasy: `In the mystical land of Eldoria, where ancient trees whispered secrets to those who listened, young Lyra discovered a forgotten crystal amulet buried beneath the roots of the Great Oak. The amulet glowed with an inner light that pulsed in rhythm with her heartbeat.\n\nVillage elders spoke of a prophecy: "When the forgotten light finds its rightful bearer, the veil between worlds will thin." Lyra had always felt different, as if something essential about her destiny remained hidden.\n\nAs moonlight touched the crystal that night, ethereal beings emerged from the forest depths. They bowed to Lyra, their luminescent forms casting dancing shadows. "The Lost Princess returns," they murmured.\n\nLyra learned she was born of two worlds—daughter to the human queen and the fae king—hidden away when dark forces sought to prevent the unification of realms. The amulet was her birthright, key to restoring balance.\n\nWith newfound guardians, Lyra began a journey to master the magic flowing through her veins. Each day, the boundary between worlds grew thinner, revealing forgotten paths and ancient magics.\n\nShe would face the shadows that had kept the worlds divided, armed with nothing but courage, truth, and the light that had always lived within her, waiting to shine.`,
+    
+    scifi: `The neural uplink activated with a soft chime as Dr. Eliza Chen settled into her lab chair. "Connection established to Martian Colony Bravo," the AI assistant announced.\n\nThree hundred million kilometers away, a humanoid robot body awakened, its consciousness now piloted by Eliza. Remote embodiment technology had revolutionized space exploration, allowing human operators to "inhabit" robotic bodies without risking their biological forms.\n\nEliza felt the Martian wind through advanced haptic systems—cold, thin, carrying fine red dust. Her mission: investigate anomalous energy readings near the colony's outer perimeter.\n\n"Unusual crystalline formation ahead," she noted, approaching a structure that hadn't appeared on yesterday's satellite imaging. The formation pulsed with energy patterns unlike anything in the database.\n\nAs she collected samples, the crystals responded, reorganizing into complex patterns that mimicked her movements. The implications were staggering—silicon-based life, evolving rapidly, attempting communication.\n\nBack on Earth, Eliza's biological heart raced. Humanity had searched the stars for signs of life, never suspecting it might find them in crystalline intelligence that operated on timescales vastly different from carbon-based life.\n\nFirst contact wasn't with beings from distant stars, but with something that had perhaps been on Mars all along, waiting for the right moment to reveal itself.`,
+    
+    mystery: `The envelope arrived on Tuesday, containing nothing but an old brass key and a black-and-white photograph of a lighthouse I didn't recognize. No note, no return address.\n\nThree more identical envelopes followed on consecutive days. Same key, same lighthouse, still no explanation.\n\nAs a retired detective, my curiosity overwhelmed my caution. Research identified the lighthouse—Widow's Point, decommissioned thirty years ago, coincidentally when my brother Michael disappeared.\n\nThe drive to the coast took four hours. The lighthouse stood on a remote cliff, paint peeling, windows dark except for the topmost room where, impossibly, light flickered.\n\nThe brass key fit perfectly. Inside, salt-worn stairs spiraled upward. Each landing held framed newspaper clippings—all missing persons cases I'd failed to solve during my career.\n\nIn the lantern room, a desk held a leather-bound journal—Michael's handwriting. "They aren't missing, Thomas. They're here, watching the ones who seek them."\n\nA collection of brass keys gleamed beside the journal, identical to mine. Footsteps echoed on the stairs below as the lighthouse door creaked open.\n\nSomeone new had received an envelope.\n\nI closed Michael's journal. It was my turn to watch.`,
+    
+    romance: `The antiquarian bookshop smelled of vanilla and dust, twin scents of aging paper and forgotten stories. Emilia hadn't meant to duck inside, but April rain had other plans, sending her seeking shelter through the nearest door.\n\n"Caught in the downpour?" The voice belonged to a man arranging leather-bound volumes on a rolling ladder.\n\n"Hazard of London springs," she replied, shaking droplets from her umbrella.\n\nNathan descended the ladder, offering her tea from a chipped pot kept warm on a hotplate behind the counter. Their conversation flowed effortlessly through literary landscapes and personal histories—her career restoring art, his inheritance of the shop from his grandfather.\n\nAs rain surrendered to evening sun, Nathan showed her a damaged first edition. "Beyond saving?" he asked.\n\nTheir fingers brushed as she examined the book's broken spine, sending unexpected warmth through her hand. "Nothing's beyond saving if you care enough to try," she answered.\n\nEmilia returned the following week with conservation tools. Each Saturday afterward became bookshop day—her restoring treasured volumes, him reading aloud from weathered pages.\n\nTwo souls, both afraid of impermanence, slowly recognized in each other what they'd sought in their preservation work—something worth keeping, worth repairing when damaged, worth loving despite the inevitable marks of time.`,
+    
+    adventure: `The satellite phone rang at 3 AM. "They've found it," Kazuo's voice crackled across continents. "The Amber Chamber is real."\n\nForty-eight hours later, I stood beside my old archaeology professor in a remote Siberian camp as he spread frost-edged maps across makeshift tables. Five years we'd chased whispers of the legendary room—an entire chamber of amber and gold, looted during World War II, never recovered.\n\nNew ground-penetrating radar revealed a cavern system beneath an abandoned Soviet mining complex. Locals avoided it, speaking of strange lights and voices echoing from ventilation shafts.\n\nOur six-person team descended the next morning. Three hours into unmapped tunnels, oxygen tanks growing lighter, we discovered a rusted door with German inscription.\n\nBeyond it lay breathtaking splendor—walls of honey-colored amber inlaid with gold and studded with precious stones, perfectly preserved in the mountain's cold heart. Sunlight had never touched this place, yet the amber seemed to generate its own golden luminescence.\n\nAmid masterworks thought destroyed stood a single wooden pedestal holding a leather journal. Inside, coordinates to seven similar chambers scattered worldwide—a hidden network of repositories for treasures thought forever lost.\n\nOur discovery wasn't an endpoint. It was a beginning.`,
+    
+    horror: `The app appeared on my phone after the firmware update. Simple black icon, no name. I assumed it was bloatware and tried deleting it. It wouldn't uninstall.\n\nCuriosity won. Inside was just a counter showing 324. No explanation, no settings. Each day the number decreased by one.\n\nOnline searches yielded nothing. Tech support insisted no such app existed in their update. I started photographing the screen to prove my sanity.\n\nAt 271, I received a notification: "Someone near you has 183 remaining." The next day, browsing a coffee shop, my phone vibrated. "The person with 182 is within 30 feet."\n\nI looked around the crowded café, wondering who else was counting down. To what?\n\nAt 230, I woke to a new notification: "Subject 183 has reached zero." News reported a local man's inexplicable death—heart stopped, no cause identified.\n\nPanic sent me to doctors, who found nothing wrong. The app couldn't be removed even after replacing my phone.\n\nYesterday: "Someone near you has 21 remaining."\n\nToday, the café again. My phone buzzes. "The person with 20 is within 5 feet."\n\nA woman at the next table glances at her phone, then scans the room with frightened eyes.\n\nOur gazes meet. Recognition passes between us.\n\nMy counter shows 108.`,
+    
+    historical: `Constantinople, April 1453. The city of a thousand years braced for what its people feared would be its final siege. Sultan Mehmed's Ottoman forces assembled outside walls that had repelled attackers for centuries.\n\nInside those walls, Anna Notaras, daughter of the Byzantine admiral, catalogued her father's library—classical texts and scientific manuscripts that represented the accumulated knowledge of ancient Greece and Rome.\n\n"The sultan builds a cannon that can shatter our walls," her father told her. "If the city falls, these texts must not."\n\nUnder cover of night, Anna disguised herself as a servant boy, smuggling precious manuscripts to Venetian ships in the harbor. Each journey risked discovery by Ottoman patrols or desperate deserters.\n\nOn her final trip, carrying Ptolemy's irreplaceable astronomical observations, cannon fire began. A Venetian captain begged her to board, but Anna turned back toward the besieged city and her family.\n\nWhen Ottoman forces breached the walls on May 29, Anna and her father fought to reach the Hagia Sophia, where scholars concealed the remaining manuscripts behind a false wall before the great cathedral became a mosque.\n\nAn empire ended, but knowledge survived—safeguarded by those who understood that preserving civilization's memory was worth any risk.`
+  };
+  
+  // Select the appropriate story based on theme or default to fantasy
+  let baseStory = stories[theme] || stories.fantasy;
+  
+  // If a prompt is provided, incorporate it into the story
+  if (prompt.trim()) {
+    // Create a prefix that incorporates the user's prompt
+    const promptPrefix = `Inspired by the idea: "${prompt}"\n\n`;
+    baseStory = promptPrefix + baseStory;
+  }
+  
+  // Adjust the length to approximate the requested word count
+  const words = baseStory.split(' ');
+  const adjustedStory = words.slice(0, Math.min(wordCount, words.length)).join(' ');
+  
+  return adjustedStory;
+};
+```
+
+--------------------------------------------------------------------------
+## Python Backend
+--------------------------------------------------------------------------
+
+### 8. public/python/story_generator.py - Story Generation Script
+```python
+import argparse
+import json
+from transformers import pipeline
+import numpy as np
+
+def generate_story(theme, word_count, prompt=''):
+    """
+    Generate a story using a Hugging Face model.
+    
+    Args:
+        theme (str): The theme for the story
+        word_count (int): Target word count for the story
+        prompt (str): User-provided one-line prompt for the story
+    
+    Returns:
+        str: The generated story
+    """
+    try:
+        # Load a text generation model from Hugging Face
+        # For local use, this will download the model the first time it's run
+        generator = pipeline('text-generation', model='gpt2')
+        
+        # Create a prompt based on the theme and user input
+        theme_prompts = {
+            "fantasy": "In the magical kingdom of Eldoria, where dragons soared through rainbow skies,",
+            "scifi": "The colony on Mars received a mysterious signal from deep space that",
+            "mystery": "Detective Sarah Morgan found a cryptic note at the crime scene that read,",
+            "romance": "When Emma bumped into the stranger at the bookstore, she had no idea he would",
+            "adventure": "The ancient map revealed the location of a treasure that had been lost for centuries,",
+            "horror": "The old house at the end of the street had been abandoned for years, until one night",
+            "historical": "In the midst of the revolution, Marie discovered a secret document that could change history:"
+        }
+        
+        # Use the theme prompt or default to fantasy
+        base_prompt = theme_prompts.get(theme.lower(), theme_prompts["fantasy"])
+        
+        # Incorporate the user's custom prompt if provided
+        if prompt:
+            generation_prompt = f"{prompt}. {base_prompt}"
+        else:
+            generation_prompt = base_prompt
+        
+        # Generate the text - we'll generate more than needed and then trim
+        # Set max_length to approximate the desired word count plus the prompt
+        # On average, 1 token is about 0.75 words
+        target_length = int(word_count / 0.75) + 20
+        
+        outputs = generator(
+            generation_prompt,
+            max_length=target_length,
+            num_return_sequences=1,
+            temperature=0.9,
+            top_p=0.9,
+            no_repeat_ngram_size=2
+        )
+        
+        # Extract the generated text
+        generated_text = outputs[0]['generated_text']
+        
+        # Clean up the text - break into paragraphs, etc.
+        paragraphs = []
+        current_paragraph = []
+        
+        for sentence in generated_text.split('. '):
+            current_paragraph.append(sentence)
+            if len(current_paragraph) >= 3 or np.random.random() < 0.2:  # Random paragraph breaks
+                paragraphs.append('. '.join(current_paragraph) + '.')
+                current_paragraph = []
+        
+        if current_paragraph:
+            paragraphs.append('. '.join(current_paragraph) + '.')
+        
+        story = '\n\n'.join(paragraphs)
+        
+        # Trim to approximate word count
+        words = story.split()
+        if len(words) > word_count:
+            story = ' '.join(words[:word_count])
+            # Make sure we end with a proper sentence
+            if not story.endswith('.'):
+                story = story + '.'
+        
+        return story
+        
+    except Exception as e:
+        print(f"Error generating story: {e}")
+        return f"Once upon a time, there was an error in story generation. {str(e)}"
+
+if __name__ == "__main__":
+    # Set up command-line argument parsing
+    parser = argparse.ArgumentParser(description='Generate a themed story')
+    parser.add_argument('--theme', type=str, default='fantasy', help='Theme of the story')
+    parser.add_argument('--words', type=int, default=300, help='Target word count')
+    parser.add_argument('--prompt', type=str, default='', help='One-line prompt for the story')
+    parser.add_argument('--output', type=str, help='Output file path (optional)')
+    
+    args = parser.parse_args()
+    
+    # Generate the story
+    story = generate_story(args.theme, args.words, args.prompt)
+    
+    # Output the story
+    if args.output:
+        with open(args.output, 'w') as f:
+            f.write(story)
+    else:
+        result = {
+            "story": story,
+            "word_count": len(story.split()),
+            "theme": args.theme,
+            "prompt": args.prompt
+        }
+        print(json.dumps(result))
+```
+
+--------------------------------------------------------------------------
+## Setup and Configuration
+--------------------------------------------------------------------------
+
+### 9. Required Dependencies
+
+#### Frontend (package.json snippet)
+```json
+{
+  "dependencies": {
+    "@tanstack/react-query": "^5.56.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.462.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "sonner": "^1.5.0",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}
+```
+
+#### Backend (Python requirements)
+```
+transformers==4.35.0
+torch==2.0.1
+numpy==1.24.3
+```
+
+### 10. How to Run the Project
+
+#### Frontend
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+#### Backend (Python)
+```bash
+# Install Python dependencies
+pip install transformers torch numpy
+
+# You can test the story generator directly
+python public/python/story_generator.py --theme fantasy --words 300 --prompt "A dragon awakens"
+```
+
+--------------------------------------------------------------------------
+## Project Documentation
+--------------------------------------------------------------------------
+
+### StoryMuse: AI-Powered Story Generator
+
+#### Project Overview
+StoryMuse is an AI-powered web application that generates creative, engaging stories based on user-defined parameters. The application leverages modern web technologies for the frontend and state-of-the-art natural language processing models for the backend story generation.
+
+#### Technical Architecture
+
+##### Frontend
+- **Framework**: React with TypeScript
+- **UI Library**: Custom components using Shadcn UI
+- **Styling**: Tailwind CSS for responsive, utility-first styling
+- **Build Tool**: Vite for fast development and optimized production builds
+- **State Management**: React's useState hooks for local component state
+- **Routing**: React Router for page navigation
+
+##### Backend
+- **Language**: Python 3.8+
+- **Libraries**:
+  - Transformers from Hugging Face for model access
+  - NumPy for numerical operations
+  - JSON for data exchange
+
+##### AI & NLP Components
+- **Model Source**: Hugging Face's model hub
+- **Primary Model**: GPT-2 for text generation
+- **NLP Techniques Used**:
+  - Natural Language Generation (NLG)
+  - Text continuation based on prompts
+  - Temperature and top-p sampling for creative diversity
+  - No-repeat n-gram size to prevent repetition
+  
+##### Integration
+- The frontend makes API calls to the Python backend
+- Story generation parameters (theme, word count, prompt) are passed to the backend
+- The backend processes these parameters, generates text using the AI model, formats it into paragraphs, and returns it to the frontend
+
+#### Key Features
+1. **Theme-Based Generation**: Stories tailored to specific genres
+2. **Custom Prompts**: User-provided ideas to guide story creation
+3. **Adjustable Length**: Control over story word count
+4. **Paragraph Formatting**: AI-generated content is structured into readable paragraphs
+5. **Export Options**: Copy to clipboard or download as text file
+
+--------------------------------------------------------------------------
+END OF STORYMUSE PROJECT DOCUMENTATION
+--------------------------------------------------------------------------

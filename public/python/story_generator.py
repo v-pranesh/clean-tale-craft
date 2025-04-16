@@ -4,13 +4,14 @@ import json
 from transformers import pipeline
 import numpy as np
 
-def generate_story(theme, word_count):
+def generate_story(theme, word_count, prompt=''):
     """
     Generate a story using a Hugging Face model.
     
     Args:
         theme (str): The theme for the story
         word_count (int): Target word count for the story
+        prompt (str): User-provided one-line prompt for the story
     
     Returns:
         str: The generated story
@@ -20,8 +21,8 @@ def generate_story(theme, word_count):
         # For local use, this will download the model the first time it's run
         generator = pipeline('text-generation', model='gpt2')
         
-        # Create a prompt based on the theme
-        prompts = {
+        # Create a prompt based on the theme and user input
+        theme_prompts = {
             "fantasy": "In the magical kingdom of Eldoria, where dragons soared through rainbow skies,",
             "scifi": "The colony on Mars received a mysterious signal from deep space that",
             "mystery": "Detective Sarah Morgan found a cryptic note at the crime scene that read,",
@@ -32,7 +33,13 @@ def generate_story(theme, word_count):
         }
         
         # Use the theme prompt or default to fantasy
-        prompt = prompts.get(theme.lower(), prompts["fantasy"])
+        base_prompt = theme_prompts.get(theme.lower(), theme_prompts["fantasy"])
+        
+        # Incorporate the user's custom prompt if provided
+        if prompt:
+            generation_prompt = f"{prompt}. {base_prompt}"
+        else:
+            generation_prompt = base_prompt
         
         # Generate the text - we'll generate more than needed and then trim
         # Set max_length to approximate the desired word count plus the prompt
@@ -40,7 +47,7 @@ def generate_story(theme, word_count):
         target_length = int(word_count / 0.75) + 20
         
         outputs = generator(
-            prompt,
+            generation_prompt,
             max_length=target_length,
             num_return_sequences=1,
             temperature=0.9,
@@ -85,12 +92,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a themed story')
     parser.add_argument('--theme', type=str, default='fantasy', help='Theme of the story')
     parser.add_argument('--words', type=int, default=300, help='Target word count')
+    parser.add_argument('--prompt', type=str, default='', help='One-line prompt for the story')
     parser.add_argument('--output', type=str, help='Output file path (optional)')
     
     args = parser.parse_args()
     
     # Generate the story
-    story = generate_story(args.theme, args.words)
+    story = generate_story(args.theme, args.words, args.prompt)
     
     # Output the story
     if args.output:
@@ -100,6 +108,7 @@ if __name__ == "__main__":
         result = {
             "story": story,
             "word_count": len(story.split()),
-            "theme": args.theme
+            "theme": args.theme,
+            "prompt": args.prompt
         }
         print(json.dumps(result))

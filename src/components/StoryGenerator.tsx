@@ -5,12 +5,14 @@ import { Slider } from "@/components/ui/slider";
 import { Wand2 } from 'lucide-react';
 import ThemeSelector from './ThemeSelector';
 import StoryDisplay from './StoryDisplay';
+import StoryPrompt from './StoryPrompt';
 import { generateStory } from '@/api/storyApi';
 import { useToast } from "@/components/ui/use-toast";
 
 const StoryGenerator = () => {
   const [theme, setTheme] = useState('fantasy');
   const [wordCount, setWordCount] = useState(300);
+  const [prompt, setPrompt] = useState('');
   const [story, setStory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -26,7 +28,7 @@ const StoryGenerator = () => {
   const handleGenerateStory = async () => {
     setIsLoading(true);
     try {
-      const generatedStory = await generateStory(theme, wordCount);
+      const generatedStory = await generateStory(theme, wordCount, prompt);
       setStory(generatedStory);
     } catch (error) {
       console.error('Error generating story:', error);
@@ -45,21 +47,25 @@ const StoryGenerator = () => {
       <div className="bg-card rounded-xl p-6 shadow-sm border animate-fade-in">
         <h2 className="text-xl font-semibold mb-4">Story Generation Settings</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <ThemeSelector selectedTheme={theme} onThemeChange={handleThemeChange} />
+        <div className="space-y-6 mb-6">
+          <StoryPrompt prompt={prompt} setPrompt={setPrompt} />
           
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Word Count: {wordCount}
-            </label>
-            <Slider
-              defaultValue={[wordCount]}
-              min={100}
-              max={500}
-              step={50}
-              onValueChange={handleWordCountChange}
-              className="w-full"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ThemeSelector selectedTheme={theme} onThemeChange={handleThemeChange} />
+            
+            <div>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Word Count: {wordCount}
+              </label>
+              <Slider
+                defaultValue={[wordCount]}
+                min={100}
+                max={500}
+                step={50}
+                onValueChange={handleWordCountChange}
+                className="w-full"
+              />
+            </div>
           </div>
         </div>
         

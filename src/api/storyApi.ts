@@ -2,7 +2,7 @@
 import { toast } from 'sonner';
 
 // Function to call our Python backend
-export const generateStory = async (theme: string, wordCount: number): Promise<string> => {
+export const generateStory = async (theme: string, wordCount: number, prompt: string = ''): Promise<string> => {
   try {
     // In production, this would call an actual API
     // For demonstration, we'll simulate a call to our local Python server
@@ -16,6 +16,7 @@ export const generateStory = async (theme: string, wordCount: number): Promise<s
       body: JSON.stringify({
         theme,
         wordCount,
+        prompt,
       }),
     });
 
@@ -34,12 +35,12 @@ export const generateStory = async (theme: string, wordCount: number): Promise<s
       description: 'Connected to local Python server for story generation',
     });
     
-    return getMockStory(theme, wordCount);
+    return getMockStory(theme, wordCount, prompt);
   }
 };
 
 // Temporary function to generate mock stories until backend is connected
-const getMockStory = (theme: string, wordCount: number): string => {
+const getMockStory = (theme: string, wordCount: number, prompt: string = ''): string => {
   const stories: Record<string, string> = {
     fantasy: `In the mystical land of Eldoria, where ancient trees whispered secrets to those who listened, young Lyra discovered a forgotten crystal amulet buried beneath the roots of the Great Oak. The amulet glowed with an inner light that pulsed in rhythm with her heartbeat.\n\nVillage elders spoke of a prophecy: "When the forgotten light finds its rightful bearer, the veil between worlds will thin." Lyra had always felt different, as if something essential about her destiny remained hidden.\n\nAs moonlight touched the crystal that night, ethereal beings emerged from the forest depths. They bowed to Lyra, their luminescent forms casting dancing shadows. "The Lost Princess returns," they murmured.\n\nLyra learned she was born of two worlds—daughter to the human queen and the fae king—hidden away when dark forces sought to prevent the unification of realms. The amulet was her birthright, key to restoring balance.\n\nWith newfound guardians, Lyra began a journey to master the magic flowing through her veins. Each day, the boundary between worlds grew thinner, revealing forgotten paths and ancient magics.\n\nShe would face the shadows that had kept the worlds divided, armed with nothing but courage, truth, and the light that had always lived within her, waiting to shine.`,
     
@@ -57,7 +58,14 @@ const getMockStory = (theme: string, wordCount: number): string => {
   };
   
   // Select the appropriate story based on theme or default to fantasy
-  const baseStory = stories[theme] || stories.fantasy;
+  let baseStory = stories[theme] || stories.fantasy;
+  
+  // If a prompt is provided, incorporate it into the story
+  if (prompt.trim()) {
+    // Create a prefix that incorporates the user's prompt
+    const promptPrefix = `Inspired by the idea: "${prompt}"\n\n`;
+    baseStory = promptPrefix + baseStory;
+  }
   
   // Adjust the length to approximate the requested word count
   const words = baseStory.split(' ');
