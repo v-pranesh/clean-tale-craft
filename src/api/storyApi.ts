@@ -7,8 +7,10 @@ export const generateStory = async (theme: string, wordCount: number, prompt: st
     // In production, this would call an actual API
     // For demonstration, we'll simulate a call to our local Python server
     
-    // Simulated API call during development
-    const response = await fetch('/api/generate-story', {
+    // Add a timestamp to ensure we don't get cached responses
+    const timestamp = new Date().getTime();
+    
+    const response = await fetch(`/api/generate-story?t=${timestamp}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,34 +43,80 @@ export const generateStory = async (theme: string, wordCount: number, prompt: st
 
 // Temporary function to generate mock stories until backend is connected
 const getMockStory = (theme: string, wordCount: number, prompt: string = ''): string => {
-  const stories: Record<string, string> = {
-    fantasy: `In the mystical land of Eldoria, where ancient trees whispered secrets to those who listened, young Lyra discovered a forgotten crystal amulet buried beneath the roots of the Great Oak. The amulet glowed with an inner light that pulsed in rhythm with her heartbeat.\n\nVillage elders spoke of a prophecy: "When the forgotten light finds its rightful bearer, the veil between worlds will thin." Lyra had always felt different, as if something essential about her destiny remained hidden.\n\nAs moonlight touched the crystal that night, ethereal beings emerged from the forest depths. They bowed to Lyra, their luminescent forms casting dancing shadows. "The Lost Princess returns," they murmured.\n\nLyra learned she was born of two worlds—daughter to the human queen and the fae king—hidden away when dark forces sought to prevent the unification of realms. The amulet was her birthright, key to restoring balance.\n\nWith newfound guardians, Lyra began a journey to master the magic flowing through her veins. Each day, the boundary between worlds grew thinner, revealing forgotten paths and ancient magics.\n\nShe would face the shadows that had kept the worlds divided, armed with nothing but courage, truth, and the light that had always lived within her, waiting to shine.`,
-    
-    scifi: `The neural uplink activated with a soft chime as Dr. Eliza Chen settled into her lab chair. "Connection established to Martian Colony Bravo," the AI assistant announced.\n\nThree hundred million kilometers away, a humanoid robot body awakened, its consciousness now piloted by Eliza. Remote embodiment technology had revolutionized space exploration, allowing human operators to "inhabit" robotic bodies without risking their biological forms.\n\nEliza felt the Martian wind through advanced haptic systems—cold, thin, carrying fine red dust. Her mission: investigate anomalous energy readings near the colony's outer perimeter.\n\n"Unusual crystalline formation ahead," she noted, approaching a structure that hadn't appeared on yesterday's satellite imaging. The formation pulsed with energy patterns unlike anything in the database.\n\nAs she collected samples, the crystals responded, reorganizing into complex patterns that mimicked her movements. The implications were staggering—silicon-based life, evolving rapidly, attempting communication.\n\nBack on Earth, Eliza's biological heart raced. Humanity had searched the stars for signs of life, never suspecting it might find them in crystalline intelligence that operated on timescales vastly different from carbon-based life.\n\nFirst contact wasn't with beings from distant stars, but with something that had perhaps been on Mars all along, waiting for the right moment to reveal itself.`,
-    
-    mystery: `The envelope arrived on Tuesday, containing nothing but an old brass key and a black-and-white photograph of a lighthouse I didn't recognize. No note, no return address.\n\nThree more identical envelopes followed on consecutive days. Same key, same lighthouse, still no explanation.\n\nAs a retired detective, my curiosity overwhelmed my caution. Research identified the lighthouse—Widow's Point, decommissioned thirty years ago, coincidentally when my brother Michael disappeared.\n\nThe drive to the coast took four hours. The lighthouse stood on a remote cliff, paint peeling, windows dark except for the topmost room where, impossibly, light flickered.\n\nThe brass key fit perfectly. Inside, salt-worn stairs spiraled upward. Each landing held framed newspaper clippings—all missing persons cases I'd failed to solve during my career.\n\nIn the lantern room, a desk held a leather-bound journal—Michael's handwriting. "They aren't missing, Thomas. They're here, watching the ones who seek them."\n\nA collection of brass keys gleamed beside the journal, identical to mine. Footsteps echoed on the stairs below as the lighthouse door creaked open.\n\nSomeone new had received an envelope.\n\nI closed Michael's journal. It was my turn to watch.`,
-    
-    romance: `The antiquarian bookshop smelled of vanilla and dust, twin scents of aging paper and forgotten stories. Emilia hadn't meant to duck inside, but April rain had other plans, sending her seeking shelter through the nearest door.\n\n"Caught in the downpour?" The voice belonged to a man arranging leather-bound volumes on a rolling ladder.\n\n"Hazard of London springs," she replied, shaking droplets from her umbrella.\n\nNathan descended the ladder, offering her tea from a chipped pot kept warm on a hotplate behind the counter. Their conversation flowed effortlessly through literary landscapes and personal histories—her career restoring art, his inheritance of the shop from his grandfather.\n\nAs rain surrendered to evening sun, Nathan showed her a damaged first edition. "Beyond saving?" he asked.\n\nTheir fingers brushed as she examined the book's broken spine, sending unexpected warmth through her hand. "Nothing's beyond saving if you care enough to try," she answered.\n\nEmilia returned the following week with conservation tools. Each Saturday afterward became bookshop day—her restoring treasured volumes, him reading aloud from weathered pages.\n\nTwo souls, both afraid of impermanence, slowly recognized in each other what they'd sought in their preservation work—something worth keeping, worth repairing when damaged, worth loving despite the inevitable marks of time.`,
-    
-    adventure: `The satellite phone rang at 3 AM. "They've found it," Kazuo's voice crackled across continents. "The Amber Chamber is real."\n\nForty-eight hours later, I stood beside my old archaeology professor in a remote Siberian camp as he spread frost-edged maps across makeshift tables. Five years we'd chased whispers of the legendary room—an entire chamber of amber and gold, looted during World War II, never recovered.\n\nNew ground-penetrating radar revealed a cavern system beneath an abandoned Soviet mining complex. Locals avoided it, speaking of strange lights and voices echoing from ventilation shafts.\n\nOur six-person team descended the next morning. Three hours into unmapped tunnels, oxygen tanks growing lighter, we discovered a rusted door with German inscription.\n\nBeyond it lay breathtaking splendor—walls of honey-colored amber inlaid with gold and studded with precious stones, perfectly preserved in the mountain's cold heart. Sunlight had never touched this place, yet the amber seemed to generate its own golden luminescence.\n\nAmid masterworks thought destroyed stood a single wooden pedestal holding a leather journal. Inside, coordinates to seven similar chambers scattered worldwide—a hidden network of repositories for treasures thought forever lost.\n\nOur discovery wasn't an endpoint. It was a beginning.`,
-    
-    horror: `The app appeared on my phone after the firmware update. Simple black icon, no name. I assumed it was bloatware and tried deleting it. It wouldn't uninstall.\n\nCuriosity won. Inside was just a counter showing 324. No explanation, no settings. Each day the number decreased by one.\n\nOnline searches yielded nothing. Tech support insisted no such app existed in their update. I started photographing the screen to prove my sanity.\n\nAt 271, I received a notification: "Someone near you has 183 remaining." The next day, browsing a coffee shop, my phone vibrated. "The person with 182 is within 30 feet."\n\nI looked around the crowded café, wondering who else was counting down. To what?\n\nAt 230, I woke to a new notification: "Subject 183 has reached zero." News reported a local man's inexplicable death—heart stopped, no cause identified.\n\nPanic sent me to doctors, who found nothing wrong. The app couldn't be removed even after replacing my phone.\n\nYesterday: "Someone near you has 21 remaining."\n\nToday, the café again. My phone buzzes. "The person with 20 is within 5 feet."\n\nA woman at the next table glances at her phone, then scans the room with frightened eyes.\n\nOur gazes meet. Recognition passes between us.\n\nMy counter shows 108.`,
-    
-    historical: `Constantinople, April 1453. The city of a thousand years braced for what its people feared would be its final siege. Sultan Mehmed's Ottoman forces assembled outside walls that had repelled attackers for centuries.\n\nInside those walls, Anna Notaras, daughter of the Byzantine admiral, catalogued her father's library—classical texts and scientific manuscripts that represented the accumulated knowledge of ancient Greece and Rome.\n\n"The sultan builds a cannon that can shatter our walls," her father told her. "If the city falls, these texts must not."\n\nUnder cover of night, Anna disguised herself as a servant boy, smuggling precious manuscripts to Venetian ships in the harbor. Each journey risked discovery by Ottoman patrols or desperate deserters.\n\nOn her final trip, carrying Ptolemy's irreplaceable astronomical observations, cannon fire began. A Venetian captain begged her to board, but Anna turned back toward the besieged city and her family.\n\nWhen Ottoman forces breached the walls on May 29, Anna and her father fought to reach the Hagia Sophia, where scholars concealed the remaining manuscripts behind a false wall before the great cathedral became a mosque.\n\nAn empire ended, but knowledge survived—safeguarded by those who understood that preserving civilization's memory was worth any risk.`
+  // Create a unique story based on the current time, theme, and prompt
+  const now = new Date();
+  const timeString = now.toISOString();
+  
+  // Generate a different starting point for each theme based on the prompt and current time
+  const promptHash = prompt.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const timeHash = timeString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const randomSeed = (promptHash + timeHash) % 100;
+  
+  // Base stories by theme
+  const storyStarters: Record<string, string[]> = {
+    fantasy: [
+      `In the mystical land of Eldoria, where ancient trees whispered secrets to those who listened, young ${prompt || 'Lyra'} discovered a forgotten crystal amulet buried beneath the roots of the Great Oak.`,
+      `The dragon's scales shimmered like emeralds in the moonlight as ${prompt || 'Prince Alden'} approached cautiously, ancient scroll in hand.`,
+      `When the seven moons aligned, the hidden door in the mountain revealed itself, and ${prompt || 'Maya'} stepped through into a world unlike any she had known before.`
+    ],
+    scifi: [
+      `The neural uplink activated with a soft chime as ${prompt || 'Dr. Chen'} settled into the lab chair, preparing to connect to the colony on distant Kepler-186f.`,
+      `"Quantum fluctuation detected in sector seven," announced the ship's AI as ${prompt || 'Captain Rodriguez'} stared at the anomaly through the viewscreen.`,
+      `${prompt || 'Ash'} discovered the ancient alien artifact buried beneath the Martian ice cap, not knowing it would rewrite humanity's understanding of the universe.`
+    ],
+    mystery: [
+      `The envelope arrived on Tuesday, containing nothing but an old brass key and a photograph of ${prompt || 'a lighthouse'} I didn't recognize.`,
+      `Detective ${prompt || 'Malone'} studied the crime scene, noting the peculiar arrangement of objects that seemed more like a message than random disorder.`,
+      `The bookstore's hidden room contained journals dating back a century, and ${prompt || 'Professor Ellis'} realized they all documented murders that had actually happened.`
+    ],
+    romance: [
+      `The antiquarian bookshop smelled of vanilla and dust when ${prompt || 'Emilia'} ducked inside to escape the sudden April rain, not knowing her life was about to change.`,
+      `Every year on the same day, ${prompt || 'James'} received a postcard from a different country, each signed only with the initial 'S' and a small drawing of a bird.`,
+      `When ${prompt || 'Olivia'} inherited her grandmother's cottage by the sea, she didn't expect to find love letters hidden beneath the floorboards—or to meet the grandson of the man who wrote them.`
+    ],
+    adventure: [
+      `The satellite phone rang at 3 AM with news that would send ${prompt || 'Dr. Kazuo'} racing to the remote Siberian coordinates: "They've found it."`,
+      `${prompt || 'Alex'} unfolded the weathered map that had been locked in the family vault for generations, finally ready to search for the treasure their ancestors had hidden.`,
+      `The storm had washed away the small coastal path, forcing ${prompt || 'Mira'} and her companions to venture inland through uncharted jungle territory.`
+    ],
+    horror: [
+      `The app appeared on ${prompt || 'my'} phone after the firmware update—a simple black icon with no name that couldn't be deleted.`,
+      `${prompt || 'Jacob'} noticed that the shadows in the old house didn't always match the objects casting them, especially in the room where the previous owner had died.`,
+      `The small town of ${prompt || 'Ravenwood'} had a tradition: no one went outside on the night of the harvest moon, and no one ever explained why.`
+    ],
+    historical: [
+      `Constantinople, April 1453. As Ottoman forces assembled outside the walls, ${prompt || 'Anna Notaras'} worked frantically to preserve the ancient manuscripts in her father's library.`,
+      `The letter informing ${prompt || 'Thomas'} of his inheritance arrived the same day as news of Napoleon's advance, forcing a choice between family legacy and patriotic duty.`,
+      `When ${prompt || 'Sarah'} joined the suffragette movement in 1912, she never imagined it would lead her from rural Pennsylvania to the front lines of a revolution.`
+    ]
   };
   
-  // Select the appropriate story based on theme or default to fantasy
-  let baseStory = stories[theme] || stories.fantasy;
+  // Select a random story starter based on the theme and random seed
+  const themeStarters = storyStarters[theme] || storyStarters.fantasy;
+  const selectedStarter = themeStarters[randomSeed % themeStarters.length];
   
-  // If a prompt is provided, incorporate it into the story
-  if (prompt.trim()) {
-    // Create a prefix that incorporates the user's prompt
-    const promptPrefix = `Inspired by the idea: "${prompt}"\n\n`;
-    baseStory = promptPrefix + baseStory;
-  }
+  // Create a middle and ending that incorporates elements from the prompt
+  const storyMiddles = [
+    `What began as a simple discovery soon revealed itself to be much more significant. The implications would change everything ${prompt ? 'about ' + prompt : 'they thought they knew'}.`,
+    `Each step forward revealed new challenges and unexpected allies. The journey was transforming ${prompt ? 'the way ' + prompt + ' saw the world' : 'their perspective completely'}.`,
+    `Nobody could have predicted how quickly things would escalate, or how deeply ${prompt ? prompt + ' would be affected' : 'they would be drawn into the situation'}.`
+  ];
   
-  // Adjust the length to approximate the requested word count
-  const words = baseStory.split(' ');
+  const storyEndings = [
+    `In the end, it wasn't about the destination but the growth that occurred along the way. ${prompt ? prompt + ' had changed irrevocably' : 'Nothing would ever be the same'}.`,
+    `Some questions were answered, but new mysteries emerged. ${prompt ? 'For ' + prompt + ', this was just the beginning' : 'This was clearly just the beginning of a larger story'}.`,
+    `The final revelation brought both closure and new possibilities. ${prompt ? prompt + ' stood ready to face whatever came next' : 'Whatever came next, they would be ready'}.`
+  ];
+  
+  // Select random story components based on different aspects of the random seed
+  const middleIndex = (randomSeed * 3) % storyMiddles.length;
+  const endingIndex = (randomSeed * 7) % storyEndings.length;
+  
+  // Combine the components into a complete story
+  const fullStory = `${selectedStarter}\n\n${storyMiddles[middleIndex]}\n\n${storyEndings[endingIndex]}`;
+  
+  // Return a story that's approximately the requested word count
+  const words = fullStory.split(' ');
   const adjustedStory = words.slice(0, Math.min(wordCount, words.length)).join(' ');
   
   return adjustedStory;
