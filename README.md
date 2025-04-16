@@ -1,73 +1,87 @@
-# Welcome to your Lovable project
+# **📖 Clean Tale Craft - AI Story Generator**  
 
-## Project info
+A **random story generator** powered by **React (Vite + TypeScript)** for the frontend and **Python (Flask + Transformers)** for AI-powered story creation.  
 
-**URL**: https://lovable.dev/projects/c346dce2-4bd9-4729-ad74-81369178b42f
+---
 
-## How can I edit this code?
+## **✨ Key Features**  
+- **AI-Generated Stories**: Uses NLP models to create unique, random stories.  
+- **Customizable Prompts**: Influence story genres, characters, and themes.  
+- **Responsive UI**: Built with **Tailwind CSS** for a clean, modern design.  
+- **Fast & Scalable**: Vite for quick development, Flask for backend logic.  
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## **🚀 How to Run the Project**  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c346dce2-4bd9-4729-ad74-81369178b42f) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### **1️⃣ Clone & Setup**  
+```bash
+git clone https://github.com/v-pranesh/clean-tale-craft.git
+cd clean-tale-craft
 ```
 
-**Edit a file directly in GitHub**
+### **2️⃣ Install Dependencies**  
+#### **Frontend (React App)**  
+```bash
+cd client
+npm install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+#### **Backend (Python AI Server)**  
+```bash
+cd ../server
+pip install -r requirements.txt  # Installs Flask + HuggingFace Transformers
+```
 
-**Use GitHub Codespaces**
+### **3️⃣ Configure Environment**  
+- **For React**: Create `.env` in `/client`:  
+  ```env
+  VITE_FLASK_URL=http://localhost:5000  # Backend API URL
+  ```
+- **For Flask**: Create `.env` in `/server`:  
+  ```env
+  SECRET_KEY=your_random_key_ # Optional for sessions
+  ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### **4️⃣ Run the App**  
+#### **Start AI Backend (Flask)**  
+*(In `/server`)*  
+```bash
+python app.py
+```
+↳ **API runs at:** `http://localhost:5000`  
 
-## What technologies are used for this project?
+#### **Start React Frontend**  
+*(In `/client`)*  
+```bash
+npm run dev
+```
+↳ **App runs at:** `http://localhost:5173`  
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## **📜 How It Works**  
+1. **User Input**: Select genre/theme (e.g., Fantasy, Sci-Fi).  
+2. **AI Processing**: Python backend uses **HuggingFace Transformers** to generate stories.  
+3. **Display**: React frontend renders the AI-generated story dynamically.  
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/c346dce2-4bd9-4729-ad74-81369178b42f) and click on Share -> Publish.
+## **🛠 Troubleshooting**  
+| Issue | Fix |
+|-------|-----|
+| `npm install` fails | Run `rm -rf node_modules package-lock.json` then retry |
+| Flask server errors | Ensure Python ≥3.8 & run `pip install --upgrade -r requirements.txt` |
+| API connection fails | Check `.env` files and CORS settings in `app.py` |
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## **🌍 Deployment Options**  
+- **Vercel/Netlify**: Deploy frontend (React) statically.  
+- **Render/Railway**: Host Flask backend.  
+- **Lovable.dev**: One-click publish via [Lovable Dashboard](https://lovable.dev).  
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+**Enjoy generating random stories!** 🎭📖  
+Let me know if you need help. 🚀
