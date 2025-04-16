@@ -28,9 +28,7 @@ const StoryGenerator = () => {
   const handleGenerateStory = async () => {
     setIsLoading(true);
     try {
-      // Add a timestamp to ensure we get a fresh story each time
-      const timestamp = new Date().getTime();
-      const generatedStory = await generateStory(theme, wordCount, prompt + '?' + timestamp);
+      const generatedStory = await generateStory(theme, wordCount, prompt);
       setStory(generatedStory);
     } catch (error) {
       console.error('Error generating story:', error);

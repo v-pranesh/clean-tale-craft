@@ -43,13 +43,12 @@ export const generateStory = async (theme: string, wordCount: number, prompt: st
 
 // Temporary function to generate mock stories until backend is connected
 const getMockStory = (theme: string, wordCount: number, prompt: string = ''): string => {
-  // Create a unique story based on the current time, theme, and prompt
+  // Create a unique story based on the theme and prompt
   const now = new Date();
-  const timeString = now.toISOString();
   
-  // Generate a different starting point for each theme based on the prompt and current time
-  const promptHash = prompt.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const timeHash = timeString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  // Generate a different starting point for each theme based on the prompt
+  const promptHash = prompt.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || Math.floor(Math.random() * 100);
+  const timeHash = now.getSeconds() + now.getMinutes() * 60;
   const randomSeed = (promptHash + timeHash) % 100;
   
   // Base stories by theme
@@ -115,9 +114,25 @@ const getMockStory = (theme: string, wordCount: number, prompt: string = ''): st
   // Combine the components into a complete story
   const fullStory = `${selectedStarter}\n\n${storyMiddles[middleIndex]}\n\n${storyEndings[endingIndex]}`;
   
-  // Return a story that's approximately the requested word count
+  // Process the story to match the requested word count more accurately
   const words = fullStory.split(' ');
-  const adjustedStory = words.slice(0, Math.min(wordCount, words.length)).join(' ');
   
-  return adjustedStory;
+  // If the story is too long, trim it
+  if (words.length > wordCount) {
+    // Try to find a sentence end near the target word count
+    let targetIndex = wordCount;
+    while (targetIndex > wordCount * 0.8 && !words[targetIndex - 1].endsWith('.')) {
+      targetIndex--;
+    }
+    
+    // If we couldn't find a period, just cut at the exact word count
+    if (targetIndex <= wordCount * 0.8) {
+      targetIndex = wordCount;
+    }
+    
+    return words.slice(0, targetIndex).join(' ');
+  }
+  
+  // If the story is too short, it's fine to return as is
+  return fullStory;
 };
