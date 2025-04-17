@@ -130,7 +130,7 @@ const getMockStory = (theme: string, wordCount: number, prompt: string = ''): st
     mystery: ['a priceless artifact disappearing', 'a series of coded messages', 'a witness with conflicting testimony', 'a locked room murder', 'a decades-old cold case reopening'],
     romance: ['a chance meeting changing everything', 'a childhood promise remembered', 'a rivalry turning to affection', 'a secret admirer revealed', 'a second chance at love'],
     adventure: ['a hidden treasure map discovered', 'a rescue mission gone wrong', 'a race against rival explorers', 'a journey to fulfill a dying wish', 'a quest to find a legendary creature'],
-    horror: ['strange noises in the walls', 'a town where people vanish at night', 'an antique mirror showing impossible reflections', 'an invitation to a house that shouldn't exist', 'a book whose words change when no one is looking'],
+    horror: ['strange noises in the walls', 'a town where people vanish at night', 'an antique mirror showing impossible reflections', 'an invitation to a house that shouldn\'t exist', 'a book whose words change when no one is looking'],
     historical: ['a secret treaty negotiation', 'a royal scandal threatening the crown', 'a revolutionary idea spreading', 'a meeting that changed the course of history', 'a forgotten hero\'s last stand']
   };
   
@@ -194,4 +194,3 @@ const getMockStory = (theme: string, wordCount: number, prompt: string = ''): st
   // If story is too short, it's fine as is
   return fullStory;
 };
-
