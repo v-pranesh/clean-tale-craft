@@ -1,47 +1,97 @@
 
 import { toast } from 'sonner';
 
-// Function to call our Python backend
+// API key for Gemini - in production, this should be stored securely
+// For demonstration purposes, we're using a temporary key
+const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"; // Replace this with your actual API key
+
 export const generateStory = async (theme: string, wordCount: number, prompt: string = ''): Promise<string> => {
   try {
-    // In production, this would call an actual API
-    // For demonstration, we'll simulate a call to our local Python server
+    // For demonstration, we'll simulate a call to the Gemini API
+    // In production, you would make an actual API call to Gemini
     
-    // Add a timestamp to ensure we don't get cached responses
-    const timestamp = new Date().getTime();
+    // Prepare the system instruction and user prompt
+    const geminiPrompt = prepareGeminiPrompt(theme, wordCount, prompt);
     
-    const response = await fetch(`/api/generate-story?t=${timestamp}`, {
+    // Make API call to Gemini
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        theme,
-        wordCount,
-        prompt,
+        contents: [
+          {
+            parts: [
+              {
+                text: geminiPrompt,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        },
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to generate story');
+      const errorData = await response.json();
+      console.error('Gemini API Error:', errorData);
+      throw new Error('Failed to generate story with Gemini API');
     }
 
     const data = await response.json();
-    return data.story;
+    
+    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+      return data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error('Unexpected response format from Gemini API');
+    }
   } catch (error) {
     console.error('Error in generateStory:', error);
     
     // For demo purposes, return a mock story if the API call fails
-    // This allows the UI to function before backend integration
     toast('Using fallback story generation', {
-      description: 'Connected to local Python server for story generation',
+      description: 'API key not configured or service unavailable',
     });
     
     return getMockStory(theme, wordCount, prompt);
   }
 };
 
-// Temporary function to generate mock stories until backend is connected
+// Helper function to prepare Gemini prompt based on theme, word count and user prompt
+const prepareGeminiPrompt = (theme: string, wordCount: number, prompt: string): string => {
+  const themeDescriptions: Record<string, string> = {
+    'fantasy': 'magical world with dragons, wizards, and mystical creatures',
+    'scifi': 'futuristic setting with advanced technology, space travel, or aliens',
+    'mystery': 'suspenseful story involving a puzzle, crime, or unexplained phenomenon',
+    'romance': 'emotional journey focused on relationships and love',
+    'adventure': 'exciting journey or quest with challenges and discoveries',
+    'horror': 'frightening or unsettling story designed to evoke fear',
+    'historical': 'story set in a specific historical period with accurate details'
+  };
+
+  const themeDescription = themeDescriptions[theme] || themeDescriptions['fantasy'];
+  
+  return `
+    Generate a creative, engaging short story with the following requirements:
+    - Theme: ${theme} (${themeDescription})
+    - Incorporate this idea: "${prompt}"
+    - Word count: approximately ${wordCount} words
+    - Format with proper paragraphs
+    - Be imaginative and original
+    - Create compelling characters and an interesting plot
+    - Have a clear beginning, middle, and conclusion
+    
+    Write ONLY the story text, without any introductions, explanations, or meta commentary.
+  `;
+};
+
+// Temporary function to generate mock stories until API key is configured
 const getMockStory = (theme: string, wordCount: number, prompt: string = ''): string => {
   // Create a unique story based on the theme and prompt
   const now = new Date();
