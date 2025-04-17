@@ -15,6 +15,8 @@ const StoryGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [story, setStory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // Add a random ID to ensure each request is treated as unique
+  const [requestId, setRequestId] = useState(Math.random().toString(36).substring(2, 15));
   const { toast } = useToast();
 
   const handleThemeChange = (newTheme: string) => {
@@ -35,10 +37,16 @@ const StoryGenerator = () => {
       return;
     }
     
+    // Generate a new request ID for each story generation
+    setRequestId(Math.random().toString(36).substring(2, 15));
     setIsLoading(true);
+    
     try {
-      const generatedStory = await generateStory(theme, wordCount, prompt);
-      setStory(generatedStory);
+      // Add the requestId to ensure we get a unique story each time
+      const generatedStory = await generateStory(theme, wordCount, prompt + ` [${requestId}]`);
+      // Strip out any requestId that might have leaked into the response
+      const cleanedStory = generatedStory.replace(new RegExp(`\\[${requestId}\\]`, 'g'), '').trim();
+      setStory(cleanedStory);
       toast({
         title: "Story Generated!",
         description: "Enjoy your unique tale.",
@@ -107,3 +115,4 @@ const StoryGenerator = () => {
 };
 
 export default StoryGenerator;
+

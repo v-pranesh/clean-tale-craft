@@ -7,11 +7,12 @@ const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"; // Replace this with your actual A
 
 export const generateStory = async (theme: string, wordCount: number, prompt: string = ''): Promise<string> => {
   try {
-    // For demonstration, we'll simulate a call to the Gemini API
-    // In production, you would make an actual API call to Gemini
+    // Add timestamp and random seed to prevent caching and ensure uniqueness
+    const timestamp = new Date().getTime();
+    const randomSeed = Math.floor(Math.random() * 10000);
     
     // Prepare the system instruction and user prompt
-    const geminiPrompt = prepareGeminiPrompt(theme, wordCount, prompt);
+    const geminiPrompt = prepareGeminiPrompt(theme, wordCount, prompt, timestamp, randomSeed);
     
     // Make API call to Gemini
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
@@ -30,7 +31,7 @@ export const generateStory = async (theme: string, wordCount: number, prompt: st
           },
         ],
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.9, // Increased for more variety
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 1024,
@@ -54,7 +55,7 @@ export const generateStory = async (theme: string, wordCount: number, prompt: st
   } catch (error) {
     console.error('Error in generateStory:', error);
     
-    // For demo purposes, return a mock story if the API call fails
+    // For demo purposes, return a unique mock story if the API call fails
     toast('Using fallback story generation', {
       description: 'API key not configured or service unavailable',
     });
@@ -64,7 +65,7 @@ export const generateStory = async (theme: string, wordCount: number, prompt: st
 };
 
 // Helper function to prepare Gemini prompt based on theme, word count and user prompt
-const prepareGeminiPrompt = (theme: string, wordCount: number, prompt: string): string => {
+const prepareGeminiPrompt = (theme: string, wordCount: number, prompt: string, timestamp: number, randomSeed: number): string => {
   const themeDescriptions: Record<string, string> = {
     'fantasy': 'magical world with dragons, wizards, and mystical creatures',
     'scifi': 'futuristic setting with advanced technology, space travel, or aliens',
@@ -77,112 +78,120 @@ const prepareGeminiPrompt = (theme: string, wordCount: number, prompt: string): 
 
   const themeDescription = themeDescriptions[theme] || themeDescriptions['fantasy'];
   
+  // Include timestamp and random seed to ensure a unique prompt every time
   return `
     Generate a creative, engaging short story with the following requirements:
     - Theme: ${theme} (${themeDescription})
     - Incorporate this idea: "${prompt}"
     - Word count: approximately ${wordCount} words
     - Format with proper paragraphs
-    - Be imaginative and original
+    - Be imaginative and original (IMPORTANT: create a completely unique story different from any previous ones)
     - Create compelling characters and an interesting plot
     - Have a clear beginning, middle, and conclusion
+    - Uniqueness tag: ${timestamp}-${randomSeed} (use this for inspiration but do not include in the story)
     
     Write ONLY the story text, without any introductions, explanations, or meta commentary.
   `;
 };
 
-// Temporary function to generate mock stories until API key is configured
+// Enhanced function to generate more varied mock stories
 const getMockStory = (theme: string, wordCount: number, prompt: string = ''): string => {
-  // Create a unique story based on the theme and prompt
+  // Create truly unique variables for each call
   const now = new Date();
+  const timeHash = now.getTime();
+  const randomSeed = Math.floor(Math.random() * 1000000);
   
-  // Generate a different starting point for each theme based on the prompt
-  const promptHash = prompt.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || Math.floor(Math.random() * 100);
-  const timeHash = now.getSeconds() + now.getMinutes() * 60;
-  const randomSeed = (promptHash + timeHash) % 100;
-  
-  // Base stories by theme
-  const storyStarters: Record<string, string[]> = {
-    fantasy: [
-      `In the mystical land of Eldoria, where ancient trees whispered secrets to those who listened, young ${prompt || 'Lyra'} discovered a forgotten crystal amulet buried beneath the roots of the Great Oak.`,
-      `The dragon's scales shimmered like emeralds in the moonlight as ${prompt || 'Prince Alden'} approached cautiously, ancient scroll in hand.`,
-      `When the seven moons aligned, the hidden door in the mountain revealed itself, and ${prompt || 'Maya'} stepped through into a world unlike any she had known before.`
-    ],
-    scifi: [
-      `The neural uplink activated with a soft chime as ${prompt || 'Dr. Chen'} settled into the lab chair, preparing to connect to the colony on distant Kepler-186f.`,
-      `"Quantum fluctuation detected in sector seven," announced the ship's AI as ${prompt || 'Captain Rodriguez'} stared at the anomaly through the viewscreen.`,
-      `${prompt || 'Ash'} discovered the ancient alien artifact buried beneath the Martian ice cap, not knowing it would rewrite humanity's understanding of the universe.`
-    ],
-    mystery: [
-      `The envelope arrived on Tuesday, containing nothing but an old brass key and a photograph of ${prompt || 'a lighthouse'} I didn't recognize.`,
-      `Detective ${prompt || 'Malone'} studied the crime scene, noting the peculiar arrangement of objects that seemed more like a message than random disorder.`,
-      `The bookstore's hidden room contained journals dating back a century, and ${prompt || 'Professor Ellis'} realized they all documented murders that had actually happened.`
-    ],
-    romance: [
-      `The antiquarian bookshop smelled of vanilla and dust when ${prompt || 'Emilia'} ducked inside to escape the sudden April rain, not knowing her life was about to change.`,
-      `Every year on the same day, ${prompt || 'James'} received a postcard from a different country, each signed only with the initial 'S' and a small drawing of a bird.`,
-      `When ${prompt || 'Olivia'} inherited her grandmother's cottage by the sea, she didn't expect to find love letters hidden beneath the floorboards—or to meet the grandson of the man who wrote them.`
-    ],
-    adventure: [
-      `The satellite phone rang at 3 AM with news that would send ${prompt || 'Dr. Kazuo'} racing to the remote Siberian coordinates: "They've found it."`,
-      `${prompt || 'Alex'} unfolded the weathered map that had been locked in the family vault for generations, finally ready to search for the treasure their ancestors had hidden.`,
-      `The storm had washed away the small coastal path, forcing ${prompt || 'Mira'} and her companions to venture inland through uncharted jungle territory.`
-    ],
-    horror: [
-      `The app appeared on ${prompt || 'my'} phone after the firmware update—a simple black icon with no name that couldn't be deleted.`,
-      `${prompt || 'Jacob'} noticed that the shadows in the old house didn't always match the objects casting them, especially in the room where the previous owner had died.`,
-      `The small town of ${prompt || 'Ravenwood'} had a tradition: no one went outside on the night of the harvest moon, and no one ever explained why.`
-    ],
-    historical: [
-      `Constantinople, April 1453. As Ottoman forces assembled outside the walls, ${prompt || 'Anna Notaras'} worked frantically to preserve the ancient manuscripts in her father's library.`,
-      `The letter informing ${prompt || 'Thomas'} of his inheritance arrived the same day as news of Napoleon's advance, forcing a choice between family legacy and patriotic duty.`,
-      `When ${prompt || 'Sarah'} joined the suffragette movement in 1912, she never imagined it would lead her from rural Pennsylvania to the front lines of a revolution.`
-    ]
+  // Characters for different themes
+  const characters: Record<string, string[]> = {
+    fantasy: ['Elara the elf mage', 'Thorin the dwarf warrior', 'Zephyr the dragon whisperer', 'Lyra the forest guardian', 'Orion the celestial knight'],
+    scifi: ['Commander Nova', 'Dr. Quantum', 'AI-X7', 'Starwalker Zara', 'Neuro Engineer Kai'],
+    mystery: ['Detective Blackwood', 'Professor Enigma', 'Agent Shadow', 'Sleuth Harper', 'Inspector Graves'],
+    romance: ['Olivia Rose', 'Ethan Rivers', 'Sofia Winters', 'James Hartley', 'Isabella Moon'],
+    adventure: ['Explorer Jackson', 'Captain Amelia', 'Ranger Tristan', 'Treasure Hunter Maya', 'Wilderness Guide Leo'],
+    horror: ['Dr. Nightmare', 'Ghost Hunter Violet', 'Medium Samuel', 'Paranormal Researcher Elle', 'Occultist Victor'],
+    historical: ['Lady Elizabeth', 'Commander William', 'Merchant Alistair', 'Duchess Eleanor', 'Soldier Thomas']
   };
   
-  // Select a random story starter based on the theme and random seed
-  const themeStarters = storyStarters[theme] || storyStarters.fantasy;
-  const selectedStarter = themeStarters[randomSeed % themeStarters.length];
+  // Settings for different themes
+  const settings: Record<string, string[]> = {
+    fantasy: ['the enchanted forest of Eldenroot', 'the floating islands of Aetheria', 'the crystal caverns beneath Mount Drakon', 'the magical academy of Luminaris', 'the borderlands between the mortal realm and the Fae kingdom'],
+    scifi: ['aboard the starship Nebula', 'in the domed city of New Terra', 'on the mining colony of Asteroid X-9', 'in the virtual reality construct called Nexus', 'during the great interplanetary migration'],
+    mystery: ['in the fog-shrouded town of Ravenhollow', 'at the abandoned Blackmoore Estate', 'during the annual masquerade ball', 'in the sealed room of the museum', 'aboard the overnight express train'],
+    romance: ['at the cliffside lighthouse', 'during the summer festival', 'in the quaint bookshop on Maple Street', 'at the international art exhibition', 'among the cherry blossoms of Sakura Park'],
+    adventure: ['in the uncharted jungles of Amazonia', 'aboard the treasure hunting vessel "Fortuna"', 'along the ancient Silk Road', 'in the shifting sands of the Crimson Desert', 'high in the peaks of the Frost Mountains'],
+    horror: ['at the Blackwood Sanitarium', 'in the forgotten village of Mist Haven', 'within the walls of the ancient cathedral', 'during the longest night of the year', 'in the house where time stands still'],
+    historical: ['during the height of the Renaissance', 'as the Roman Empire began to fall', 'amid the Industrial Revolution', 'on the eve of the French Revolution', 'during the Golden Age of Piracy']
+  };
   
-  // Create a middle and ending that incorporates elements from the prompt
-  const storyMiddles = [
-    `What began as a simple discovery soon revealed itself to be much more significant. The implications would change everything ${prompt ? 'about ' + prompt : 'they thought they knew'}.`,
-    `Each step forward revealed new challenges and unexpected allies. The journey was transforming ${prompt ? 'the way ' + prompt + ' saw the world' : 'their perspective completely'}.`,
-    `Nobody could have predicted how quickly things would escalate, or how deeply ${prompt ? prompt + ' would be affected' : 'they would be drawn into the situation'}.`
+  // Plot elements for different themes
+  const plots: Record<string, string[]> = {
+    fantasy: ['a prophecy coming true', 'a magical artifact awakening', 'a curse that needs breaking', 'a portal to another world opening', 'an ancient being returning'],
+    scifi: ['a strange signal from deep space', 'a malfunction in the ship\'s AI', 'a time anomaly appearing', 'a breakthrough in teleportation technology', 'first contact with an alien species'],
+    mystery: ['a priceless artifact disappearing', 'a series of coded messages', 'a witness with conflicting testimony', 'a locked room murder', 'a decades-old cold case reopening'],
+    romance: ['a chance meeting changing everything', 'a childhood promise remembered', 'a rivalry turning to affection', 'a secret admirer revealed', 'a second chance at love'],
+    adventure: ['a hidden treasure map discovered', 'a rescue mission gone wrong', 'a race against rival explorers', 'a journey to fulfill a dying wish', 'a quest to find a legendary creature'],
+    horror: ['strange noises in the walls', 'a town where people vanish at night', 'an antique mirror showing impossible reflections', 'an invitation to a house that shouldn't exist', 'a book whose words change when no one is looking'],
+    historical: ['a secret treaty negotiation', 'a royal scandal threatening the crown', 'a revolutionary idea spreading', 'a meeting that changed the course of history', 'a forgotten hero\'s last stand']
+  };
+  
+  // Select random elements based on the theme and random seeds
+  const themeChars = characters[theme] || characters.fantasy;
+  const themeSettings = settings[theme] || settings.fantasy;
+  const themePlots = plots[theme] || plots.fantasy;
+  
+  const charIndex = (randomSeed % themeChars.length);
+  const settingIndex = ((randomSeed * 3) % themeSettings.length);
+  const plotIndex = ((randomSeed * 7) % themePlots.length);
+  
+  // Select or create a character name using the prompt if provided
+  const character = prompt ? prompt : themeChars[charIndex];
+  const setting = themeSettings[settingIndex];
+  const plotElement = themePlots[plotIndex];
+  
+  // Construct a unique beginning, middle, and end
+  const beginning = `${character} found themselves in ${setting} when ${plotElement} suddenly changed everything. The air itself seemed to hold its breath as destiny began to unfold.`;
+  
+  const middles = [
+    `What started as curiosity quickly became a test of courage and wit. Each step forward revealed new challenges that would require all their skills to overcome.`,
+    `They weren't prepared for the consequences of their discovery, but there was no turning back now. The path ahead was fraught with danger, but also with extraordinary possibility.`,
+    `Nobody else seemed to notice the changes at first, giving them precious time to investigate. But soon they wouldn't be the only one seeking answers - or power.`,
+    `The situation demanded action, even though the risks were unclear. With determination and a bit of luck, they gathered allies who could help navigate this unexpected journey.`,
+    `Ancient legends spoke of such moments, but experiencing it firsthand was something else entirely. They would need to learn quickly if they hoped to succeed.`
   ];
   
-  const storyEndings = [
-    `In the end, it wasn't about the destination but the growth that occurred along the way. ${prompt ? prompt + ' had changed irrevocably' : 'Nothing would ever be the same'}.`,
-    `Some questions were answered, but new mysteries emerged. ${prompt ? 'For ' + prompt + ', this was just the beginning' : 'This was clearly just the beginning of a larger story'}.`,
-    `The final revelation brought both closure and new possibilities. ${prompt ? prompt + ' stood ready to face whatever came next' : 'Whatever came next, they would be ready'}.`
+  const endings = [
+    `When the dust settled, nothing was quite the same - least of all themselves. Some questions were answered, but new mysteries emerged on the horizon.`,
+    `In the end, they made a choice that would echo through time. Whether it was the right one, only the future would reveal.`,
+    `The journey had changed them in ways they never expected, opening doors to possibilities they hadn't imagined before. This was not an end, but a beginning.`,
+    `Sometimes the greatest victories are the ones no one else will ever know about. They smiled, keeping their secret close as they looked toward tomorrow.`,
+    `What they discovered would remain with them always, a reminder that even in the darkest moments, hope and courage can light the way forward.`
   ];
   
-  // Select random story components based on different aspects of the random seed
-  const middleIndex = (randomSeed * 3) % storyMiddles.length;
-  const endingIndex = (randomSeed * 7) % storyEndings.length;
+  // Select different parts based on different aspects of the random seed
+  const middleIndex = timeHash % middles.length;
+  const endingIndex = (timeHash * 13) % endings.length;
   
-  // Combine the components into a complete story
-  const fullStory = `${selectedStarter}\n\n${storyMiddles[middleIndex]}\n\n${storyEndings[endingIndex]}`;
+  // Combine the parts into a complete story
+  const fullStory = `${beginning}\n\n${middles[middleIndex]}\n\n${endings[endingIndex]}`;
   
-  // Process the story to match the requested word count more accurately
+  // Adjust word count
   const words = fullStory.split(' ');
-  
-  // If the story is too long, trim it
   if (words.length > wordCount) {
-    // Try to find a sentence end near the target word count
+    // Find a sentence end near target word count
     let targetIndex = wordCount;
-    while (targetIndex > wordCount * 0.8 && !words[targetIndex - 1].endsWith('.')) {
+    while (targetIndex > wordCount * 0.8 && targetIndex > 0 && !words[targetIndex - 1].endsWith('.')) {
       targetIndex--;
     }
     
-    // If we couldn't find a period, just cut at the exact word count
-    if (targetIndex <= wordCount * 0.8) {
+    // If we couldn't find a sentence end, just cut at word count
+    if (targetIndex <= wordCount * 0.75) {
       targetIndex = wordCount;
     }
     
-    return words.slice(0, targetIndex).join(' ');
+    return words.slice(0, targetIndex).join(' ') + '.';
   }
   
-  // If the story is too short, it's fine to return as is
+  // If story is too short, it's fine as is
   return fullStory;
 };
+
