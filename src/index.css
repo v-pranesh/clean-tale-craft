@@ -5,33 +5,33 @@
 
 @layer base {
   :root {
-    --background: 250 100% 99%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 40 30% 98%;
+    --foreground: 20 40% 18%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 37 20% 97%;
+    --card-foreground: 20 40% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 37 30% 97%;
+    --popover-foreground: 20 40% 15%;
 
-    --primary: 252 87% 67%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 30 84% 55%;
+    --primary-foreground: 30 10% 98%;
 
-    --secondary: 270 80% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 40 60% 96%;
+    --secondary-foreground: 24 30% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 35 30% 92%;
+    --muted-foreground: 25 15% 40%;
 
-    --accent: 270 80% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 36 70% 94%;
+    --accent-foreground: 24 30% 20%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 10 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 252 87% 67%;
+    --border: 30 20% 86%;
+    --input: 30 20% 86%;
+    --ring: 30 84% 50%;
 
     --radius: 0.75rem;
   }
@@ -39,6 +39,23 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+    background-image: url('https://source.unsplash.com/photo-1509316975850-ff9c5deb0cd9');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(255, 253, 244, 0.92), rgba(255, 248, 230, 0.94));
+    z-index: -1;
   }
 }
 
@@ -60,5 +77,43 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  .parchment-texture {
+    background-color: rgba(255, 250, 240, 0.9);
+    background-image: url('https://source.unsplash.com/photo-1470813740244-df37b8c1edcb');
+    background-blend-mode: overlay;
+    background-size: cover;
+    box-shadow: 0 4px 15px rgba(160, 120, 85, 0.1);
+    border: 1px solid rgba(210, 180, 140, 0.3);
+  }
+
+  .story-text {
+    font-family: 'Lora', serif;
+    line-height: 1.8;
+    letter-spacing: 0.01em;
+  }
+
+  .ink-splash {
+    position: relative;
+  }
+
+  .ink-splash::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-image: url('https://source.unsplash.com/photo-1472396961693-142e6e269027');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.07;
+    transform: rotate(15deg);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .handwritten {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
   }
 }

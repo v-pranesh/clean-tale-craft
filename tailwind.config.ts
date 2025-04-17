@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'serif': ['Playfair Display', 'serif'],
+				'body-serif': ['Lora', 'serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -84,11 +89,32 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'gentle-rotate': {
+					'0%': { transform: 'rotate(0deg)' },
+					'25%': { transform: 'rotate(1deg)' },
+					'75%': { transform: 'rotate(-1deg)' },
+					'100%': { transform: 'rotate(0deg)' }
+				},
+				'soft-pulse': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 6s ease-in-out infinite',
+				'gentle-rotate': 'gentle-rotate 6s ease-in-out infinite',
+				'soft-pulse': 'soft-pulse 4s ease-in-out infinite'
+			},
+			backgroundImage: {
+				'parchment': "url('https://source.unsplash.com/photo-1518495973542-4542c06a5843')",
+				'parchment-light': "linear-gradient(to right, rgba(255, 253, 244, 0.9), rgba(255, 248, 230, 0.9))"
 			}
 		}
 	},

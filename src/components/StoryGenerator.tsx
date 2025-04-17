@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Wand2, Sparkles, BookOpen } from 'lucide-react';
+import { Wand2, Sparkles, BookOpen, Feather, Scroll } from 'lucide-react';
 import ThemeSelector from './ThemeSelector';
 import StoryDisplay from './StoryDisplay';
 import StoryPrompt from './StoryPrompt';
@@ -66,10 +66,10 @@ const StoryGenerator = () => {
 
   return (
     <div className="container mx-auto px-4 max-w-3xl">
-      <div className="bg-gradient-to-br from-white to-secondary/40 rounded-xl p-6 shadow-lg border border-secondary/30 animate-fade-in">
+      <div className="parchment-texture rounded-xl p-6 shadow-lg animate-fade-in">
         <div className="flex items-center gap-2 mb-4">
-          <BookOpen className="h-6 w-6 text-primary" />
-          <h2 className="text-xl font-semibold">Story Generator</h2>
+          <Scroll className="h-6 w-6 text-primary animate-gentle-rotate" />
+          <h2 className="text-xl font-serif font-semibold">Story Enchanter</h2>
         </div>
         
         <div className="space-y-6 mb-6">
@@ -78,10 +78,10 @@ const StoryGenerator = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ThemeSelector selectedTheme={theme} onThemeChange={handleThemeChange} />
             
-            <div className="bg-white/50 p-4 rounded-lg border border-primary/10">
+            <div className="bg-white/50 p-4 rounded-lg border border-primary/10 ink-splash">
               <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center">
-                <Sparkles className="h-4 w-4 mr-2 text-primary/70" />
-                Word Count: {wordCount}
+                <Sparkles className="h-4 w-4 mr-2 text-primary/70 animate-soft-pulse" />
+                <span className="font-body-serif">Word Count: {wordCount}</span>
               </label>
               <Slider
                 defaultValue={[wordCount]}
@@ -97,11 +97,11 @@ const StoryGenerator = () => {
         
         <Button
           onClick={handleGenerateStory}
-          className="w-full md:w-auto bg-primary hover:bg-primary/90 transition-all duration-300 transform hover:scale-105"
+          className="w-full md:w-auto bg-primary hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 font-serif"
           disabled={isLoading}
         >
-          <Wand2 className="h-4 w-4 mr-2" />
-          {isLoading ? 'Crafting your tale...' : 'Generate Story'}
+          <Feather className="h-4 w-4 mr-2 animate-float" />
+          {isLoading ? 'Weaving your tale...' : 'Enchant My Story'}
         </Button>
       </div>
       
@@ -115,4 +115,3 @@ const StoryGenerator = () => {
 };
 
 export default StoryGenerator;
-
