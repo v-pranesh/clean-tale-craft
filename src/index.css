@@ -5,19 +5,19 @@
 
 @layer base {
   :root {
-    --background: 40 30% 98%;
+    --background: 39 30% 98%;
     --foreground: 20 40% 18%;
 
-    --card: 37 20% 97%;
+    --card: 36 25% 97%;
     --card-foreground: 20 40% 15%;
 
-    --popover: 37 30% 97%;
+    --popover: 36 30% 97%;
     --popover-foreground: 20 40% 15%;
 
-    --primary: 30 84% 55%;
+    --primary: 30 85% 55%;
     --primary-foreground: 30 10% 98%;
 
-    --secondary: 40 60% 96%;
+    --secondary: 39 60% 96%;
     --secondary-foreground: 24 30% 20%;
 
     --muted: 35 30% 92%;
@@ -29,9 +29,9 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 10 40% 98%;
 
-    --border: 30 20% 86%;
-    --input: 30 20% 86%;
-    --ring: 30 84% 50%;
+    --border: 30 30% 86%;
+    --input: 30 30% 86%;
+    --ring: 30 85% 50%;
 
     --radius: 0.75rem;
   }
@@ -61,7 +61,7 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 bg-clip-text text-transparent;
   }
   
   .animate-fade-in {
@@ -84,7 +84,7 @@
     background-image: url('https://source.unsplash.com/photo-1470813740244-df37b8c1edcb');
     background-blend-mode: overlay;
     background-size: cover;
-    box-shadow: 0 4px 15px rgba(160, 120, 85, 0.1);
+    box-shadow: 0 4px 15px rgba(160, 120, 85, 0.15);
     border: 1px solid rgba(210, 180, 140, 0.3);
   }
 
@@ -115,5 +115,48 @@
   .handwritten {
     font-family: 'Playfair Display', serif;
     font-style: italic;
+  }
+  
+  /* Additional animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+  }
+  
+  .animate-gentle-rotate {
+    animation: gentleRotate 6s ease-in-out infinite;
+  }
+  
+  @keyframes gentleRotate {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(3deg); }
+    75% { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
+  }
+  
+  .animate-soft-pulse {
+    animation: softPulse 4s ease-in-out infinite;
+  }
+  
+  @keyframes softPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(0.95); }
+  }
+  
+  /* Additional background gradients */
+  .bg-parchment-light {
+    background: linear-gradient(135deg, rgba(255, 252, 240, 0.9), rgba(253, 245, 230, 0.9));
+  }
+  
+  .bg-parchment-warm {
+    background: linear-gradient(135deg, rgba(255, 248, 220, 0.9), rgba(250, 235, 215, 0.9));
+  }
+  
+  .bg-amber-gradient {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.15));
   }
 }

@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Wand2, Sparkles, BookOpen, Feather, Scroll } from 'lucide-react';
+import { Wand2, Sparkles, BookOpen, Feather, Scroll, Bookmark, Palette, PenTool } from 'lucide-react';
 import ThemeSelector from './ThemeSelector';
 import StoryDisplay from './StoryDisplay';
 import StoryPrompt from './StoryPrompt';
 import { generateStory } from '@/api/storyApi';
 import { useToast } from "@/components/ui/use-toast";
+import AnimatedImage from './AnimatedImage';
 
 const StoryGenerator = () => {
   const [theme, setTheme] = useState('fantasy');
@@ -65,8 +66,24 @@ const StoryGenerator = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 max-w-3xl">
-      <div className="parchment-texture rounded-xl p-6 shadow-lg animate-fade-in">
+    <div className="container mx-auto px-4 max-w-3xl relative">
+      <AnimatedImage 
+        src="https://images.unsplash.com/photo-1518495973542-4542c06a5843" 
+        className="absolute -top-10 -right-20 w-24 h-24 opacity-20 animate-gentle-rotate"
+        alt="Decorative leaf"
+      />
+      
+      <AnimatedImage 
+        src="https://images.unsplash.com/photo-1518495973542-4542c06a5843" 
+        className="absolute -bottom-10 -left-16 w-20 h-20 opacity-20 animate-float"
+        alt="Decorative leaf"
+      />
+      
+      <div className="parchment-texture rounded-xl p-6 shadow-lg animate-fade-in relative overflow-hidden">
+        <div className="absolute -bottom-4 -right-4 opacity-10">
+          <Bookmark className="w-20 h-20 text-amber-700 transform rotate-12" />
+        </div>
+        
         <div className="flex items-center gap-2 mb-4">
           <Scroll className="h-6 w-6 text-primary animate-gentle-rotate" />
           <h2 className="text-xl font-serif font-semibold">Story Enchanter</h2>
@@ -78,7 +95,7 @@ const StoryGenerator = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ThemeSelector selectedTheme={theme} onThemeChange={handleThemeChange} />
             
-            <div className="bg-white/50 p-4 rounded-lg border border-primary/10 ink-splash">
+            <div className="bg-gradient-to-br from-amber-50/60 to-amber-100/40 p-4 rounded-lg border border-primary/10 ink-splash">
               <label className="block text-sm font-medium text-muted-foreground mb-2 flex items-center">
                 <Sparkles className="h-4 w-4 mr-2 text-primary/70 animate-soft-pulse" />
                 <span className="font-body-serif">Word Count: {wordCount}</span>
@@ -97,7 +114,7 @@ const StoryGenerator = () => {
         
         <Button
           onClick={handleGenerateStory}
-          className="w-full md:w-auto bg-primary hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 font-serif"
+          className="w-full md:w-auto bg-primary hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 font-serif shadow-md"
           disabled={isLoading}
         >
           <Feather className="h-4 w-4 mr-2 animate-float" />
