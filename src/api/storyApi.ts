@@ -1,8 +1,6 @@
-
 import { toast } from 'sonner';
 
 // API key for Gemini - in production, this should be stored securely
-// For demonstration purposes, we're using a temporary key
 const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"; // Replace this with your actual API key
 
 export const generateStory = async (theme: string, wordCount: number, prompt: string = ''): Promise<string> => {
